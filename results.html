@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Search Results</title>
+  <script async src="https://cse.google.com/cse.js?cx=252318e25473648ad"></script>
+  <style>
+    body {
+      background-color: #121212;
+      color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    #greeting {
+      font-size: 50px;
+      font-family: Helvetica, sans-serif;
+      font-weight: bold;
+      text-align: center;
+      margin: 20px;
+      margin-top: 40px;
+      filter: blur(10px);
+      opacity: 0;
+      clip-path: inset(0 100% 0 0);
+      animation: reveal 2s forwards ease-out;
+      mask-image: linear-gradient(to right, black 0%, black 50%, transparent 100%);
+      mask-size: 200% 100%;
+      -webkit-mask-image: -webkit-linear-gradient(left, black 0%, black 50%, transparent 100%);
+      -webkit-mask-size: 200% 100%;
+    }
+
+    @keyframes reveal {
+      0% {
+        opacity: 0;
+        filter: blur(10px);
+        clip-path: inset(0 100% 0 0);
+        color: #FBD272;
+      }
+      30% {
+        opacity: 1;
+        color: #FBD272;
+      }
+      100% {
+        opacity: 1;
+        filter: blur(0px);
+        clip-path: inset(0 0 0 0);
+        color: #FFFFFF;
+      }
+    }
+
+    .card {
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .card a {
+      color: #6aa9ff;
+      text-decoration: none;
+    }
+
+    .card .snippet {
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .images {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .images img {
+      width: 100%;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="greeting">Search Results</div>
+  <div id="results"></div>
+  <div id="images" class="images"></div>
+
+  <!-- Hidden CSE containers -->
+  <div style="display:none">
+    <div class="gcse-searchresults" gname="web"></div>
+    <div class="gcse-searchresults" gname="images" searchType="image"></div>
+  </div>
+
+  <script>
+    // Get query from URL
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get("q");
+
+    window.__gcse = {
+      callback: function() {
+        const web = google.search.cse.element.getElement('web');
+        const images = google.search.cse.element.getElement('images');
+
+        web.setSearchCompleteCallback(null, () => {
+          renderWeb(web.getResults());
+        });
+        images.setSearchCompleteCallback(null, () => {
+          renderImages(images.getResults());
+        });
+
+        if(query) {
+          web.execute(query);
+          images.execute(query);
+        }
+      }
+    };
+
+    function renderWeb(results) {
+      const container = document.getElementById("results");
+      container.innerHTML = "";
+      if(!results || !results.results) return;
+      results.results.forEach(r => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3><a href="${r.url}" target="_blank">${r.title}</a></h3>
+          <div class="snippet">${r.content || ""}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderImages(results) {
+      const container = document.getElementById("images");
+      container.innerHTML = "";
+      if(!results || !results.results) return;
+      results.results.forEach(r => {
+        const img = document.createElement("img");
+        img.src = r.image.thumbnailLink;
+        img.alt = r.title || "";
+        container.appendChild(img);
+      });
+    }
+  </script>
+</body>
+</html>
